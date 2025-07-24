@@ -1,0 +1,9 @@
+# Core libraries
+numpy>=1.19.0
+matplotlib>=3.3.0
+scikit-learn>=0.24.0
+opencv-python>=4.5.0
+
+# Additional libraries that might be needed
+pandas>=1.2.0
+pillow>=8.0.0
