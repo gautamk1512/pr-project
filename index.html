@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Carousel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Simple Carousel Card -->
+        <div class="carousel-card">
+            <!-- Team Carousel Section -->
+            <div class="carousel-section">
+                <div class="team-title">OUR TEAM</div>
+                <div class="carousel-container">
+                    <button class="nav-arrow left-arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15,18 9,12 15,6"></polyline>
+                        </svg>
+                    </button>
+                    
+                    <div class="carousel-wrapper">
+                        <div class="carousel-track">
+                            <div class="carousel-item active">
+                                <div class="profile-image">
+                                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop&crop=face" alt="Sophia Chen">
+                                </div>
+                                <div class="profile-info">
+                                    <h3 class="name">Sophia Chen</h3>
+                                    <p class="role">FOUNDER & CEO</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="profile-image">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&crop=face" alt="Alex Rodriguez">
+                                </div>
+                                <div class="profile-info">
+                                    <h3 class="name">Alex Rodriguez</h3>
+                                    <p class="role">TECH LEAD</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="profile-image">
+                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=400&fit=crop&crop=face" alt="Emma Wilson">
+                                </div>
+                                <div class="profile-info">
+                                    <h3 class="name">Emma Wilson</h3>
+                                    <p class="role">DESIGN DIRECTOR</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="profile-image">
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop&crop=face" alt="David Thompson">
+                                </div>
+                                <div class="profile-info">
+                                    <h3 class="name">David Thompson</h3>
+                                    <p class="role">PRODUCT MANAGER</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <button class="nav-arrow right-arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,18 15,12 9,6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Navigation Dots -->
+                <div class="nav-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
