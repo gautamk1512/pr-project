@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLP Digit Classifier</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .input-group label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .input-group input {
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            width: 200px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .predict-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+        
+        .result-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+        
+        .prediction-info {
+            text-align: center;
+        }
+        
+        .digit-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4facfe;
+            margin: 20px 0;
+        }
+        
+        .accuracy-display {
+            font-size: 1.5em;
+            color: #28a745;
+            margin: 10px 0;
+        }
+        
+        .confidence-display {
+            font-size: 1.2em;
+            color: #6c757d;
+            margin: 10px 0;
+        }
+        
+        .digit-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-group input {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 MLP Digit Classifier</h1>
+            <p>Enter a number to see how our neural network predicts MNIST digits</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="digitInput">Enter a digit index (0-9999):</label>
+                    <input type="number" id="digitInput" min="0" max="9999" value="0" placeholder="Enter index...">
+                    <button class="predict-btn" onclick="predictDigit()">🔮 Predict</button>
+                </div>
+                <p style="margin-top: 15px; color: #6c757d; font-size: 0.9em;">
+                    This will select a random digit from the MNIST test dataset and show the model's prediction
+                </p>
+            </div>
+            
+            <div id="results" style="display: none;">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>📊 Prediction Results</h3>
+                        <div class="prediction-info">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="actualDigit">-</div>
+                                    <div class="stat-label">Actual Digit</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="predictedDigit">-</div>
+                                    <div class="stat-label">Predicted Digit</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="confidence">-</div>
+                                    <div class="stat-label">Confidence</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="overallAccuracy">-</div>
+                                    <div class="stat-label">Model Accuracy</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pattern Analysis Section -->
+                            <div id="patternAnalysis" class="pattern-analysis" style="display: none; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                                <h4 style="margin-bottom: 10px; color: #333;">🔍 Pattern Analysis</h4>
+                                <div class="pattern-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
+                                    <div><strong>Match Status:</strong> <span id="matchStatus">-</span></div>
+                                    <div><strong>Confidence Level:</strong> <span id="confidenceLevel">-</span></div>
+                                    <div><strong>Prediction Quality:</strong> <span id="predictionQuality">-</span></div>
+                                    <div><strong>Input Index:</strong> <span id="inputIndex">-</span></div>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <strong>Digit Characteristics:</strong> <span id="digitCharacteristics">-</span>
+                                </div>
+                                <div id="confusionInfo" style="margin-top: 10px; display: none;">
+                                    <strong>Common Confusion:</strong> <span id="commonConfusion">-</span>
+                                </div>
+                            </div>
+                            
+                            <img id="digitImage" class="digit-image" style="display: none;" alt="Digit Image">
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>📈 Training History</h3>
+                        <div class="chart-container">
+                            <canvas id="accuracyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                🔄 Making prediction...
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        let accuracyChart = null;
+        
+        async function predictDigit() {
+            const digitInput = document.getElementById('digitInput');
+            const digitIndex = parseInt(digitInput.value) || 0;
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            // Disable button
+            const btn = document.querySelector('.predict-btn');
+            btn.disabled = true;
+            btn.textContent = '🔄 Predicting...';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ digit_index: digitIndex })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Update results
+                document.getElementById('actualDigit').textContent = data.actual_digit;
+                document.getElementById('predictedDigit').textContent = data.predicted_digit;
+                document.getElementById('confidence').textContent = data.confidence.toFixed(2) + '%';
+                document.getElementById('overallAccuracy').textContent = data.overall_accuracy.toFixed(2) + '%';
+                
+                // Update pattern analysis
+                if (data.pattern_info) {
+                    document.getElementById('matchStatus').textContent = data.pattern_info.match_status;
+                    document.getElementById('confidenceLevel').textContent = data.pattern_info.confidence_level;
+                    document.getElementById('predictionQuality').textContent = data.pattern_info.prediction_quality;
+                    document.getElementById('inputIndex').textContent = data.input_index;
+                    document.getElementById('digitCharacteristics').textContent = data.pattern_info.digit_characteristics;
+                    
+                    // Show confusion info only if there's a mismatch
+                    const confusionDiv = document.getElementById('confusionInfo');
+                    if (!data.pattern_info.is_correct && data.pattern_info.common_confusion) {
+                        document.getElementById('commonConfusion').textContent = data.pattern_info.common_confusion;
+                        confusionDiv.style.display = 'block';
+                    } else {
+                        confusionDiv.style.display = 'none';
+                    }
+                    
+                    document.getElementById('patternAnalysis').style.display = 'block';
+                }
+                
+                // Show image
+                const img = document.getElementById('digitImage');
+                img.src = 'data:image/png;base64,' + data.image;
+                img.style.display = 'block';
+                
+                // Update chart
+                updateChart(data.history);
+                
+                // Show results
+                document.getElementById('results').style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('error').textContent = 'Error: ' + error.message;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                // Hide loading and re-enable button
+                document.getElementById('loading').style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = '🔮 Predict';
+            }
+        }
+        
+        function updateChart(history) {
+            const ctx = document.getElementById('accuracyChart').getContext('2d');
+            
+            if (accuracyChart) {
+                accuracyChart.destroy();
+            }
+            
+            const epochs = Array.from({length: history.accuracy.length}, (_, i) => i + 1);
+            
+            accuracyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: epochs,
+                    datasets: [
+                        {
+                            label: 'Training Accuracy',
+                            data: history.accuracy.map(acc => acc * 100),
+                            borderColor: '#4facfe',
+                            backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Validation Accuracy',
+                            data: history.val_accuracy.map(acc => acc * 100),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Model Training Progress'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Accuracy (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Epoch'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Allow Enter key to trigger prediction
+        document.getElementById('digitInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                predictDigit();
+            }
+        });
+        
+        // Auto-predict on page load with index 0
+        window.addEventListener('load', function() {
+            setTimeout(predictDigit, 1000);
+        });
+    </script>
+</body>
+</html>
