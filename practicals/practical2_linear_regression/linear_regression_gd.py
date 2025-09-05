@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_regression, load_diabetes, load_boston
+from sklearn.datasets import make_regression, load_diabetes, fetch_california_housing
+import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
@@ -238,13 +239,10 @@ def load_real_dataset(dataset_name='diabetes'):
     if dataset_name == 'diabetes':
         data = load_diabetes()
         return data.data, data.target
-    elif dataset_name == 'boston':
-        try:
-            data = load_boston()
-            return data.data, data.target
-        except ImportError:
-            print("Boston dataset not available in this sklearn version")
-            return load_diabetes().data, load_diabetes().target
+    elif dataset_name == 'boston' or dataset_name == 'california':
+        # Boston dataset is deprecated, using California housing dataset instead
+        data = fetch_california_housing()
+        return data.data, data.target
     else:
         raise ValueError("Unknown dataset name")
 

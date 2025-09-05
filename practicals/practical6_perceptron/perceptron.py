@@ -1,4 +1,7 @@
 import numpy as np
+# Set matplotlib backend before importing pyplot to avoid Tkinter errors
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.datasets import make_classification, make_blobs, load_iris, load_breast_cancer
@@ -213,7 +216,7 @@ class LinearPerceptron:
         
         return self
     
-    def plot_training_history(self, figsize: Tuple[int, int] = (15, 5)) -> None:
+    def plot_training_history(self, figsize: Tuple[int, int] = (15, 5), save_path: Optional[str] = None) -> None:
         """
         Plot training history including errors, accuracy, and weight evolution
         
@@ -221,6 +224,8 @@ class LinearPerceptron:
         -----------
         figsize : tuple, default=(15, 5)
             Figure size for the plots
+        save_path : str, optional
+            Path to save the figure instead of displaying it
         """
         if not self.error_history:
             raise ValueError("No training history available. Train the model first.")
@@ -279,11 +284,20 @@ class LinearPerceptron:
             axes[2].grid(True, alpha=0.3)
         
         plt.tight_layout()
-        plt.show()
+        
+        if save_path:
+            plt.savefig(save_path)
+        else:
+            # With Agg backend, we save to a default location instead of showing
+            plt.savefig('perceptron_training_history.png')
+            print("Training history plot saved to 'perceptron_training_history.png'")
+        
+        plt.close(fig)  # Close the figure to prevent memory leaks
     
     def plot_decision_boundary(self, X: np.ndarray, y: np.ndarray, 
                               title: str = "Perceptron Decision Boundary",
-                              figsize: Tuple[int, int] = (10, 8)) -> None:
+                              figsize: Tuple[int, int] = (10, 8),
+                              save_path: Optional[str] = None) -> None:
         """
         Plot decision boundary for 2D data
         
@@ -297,6 +311,8 @@ class LinearPerceptron:
             Plot title
         figsize : tuple
             Figure size
+        save_path : str, optional
+            Path to save the figure instead of displaying it
         """
         if X.shape[1] != 2:
             raise ValueError("Decision boundary plotting only supports 2D data")
@@ -304,7 +320,7 @@ class LinearPerceptron:
         if self.weights is None:
             raise ValueError("Model must be trained before plotting decision boundary")
         
-        plt.figure(figsize=figsize)
+        fig = plt.figure(figsize=figsize)
         
         # Create a mesh for plotting decision boundary
         h = 0.02  # Step size in the mesh
@@ -336,7 +352,15 @@ class LinearPerceptron:
         plt.title(title)
         plt.legend()
         plt.grid(True, alpha=0.3)
-        plt.show()
+        
+        if save_path:
+            plt.savefig(save_path)
+        else:
+            # With Agg backend, we save to a default location instead of showing
+            plt.savefig('perceptron_decision_boundary.png')
+            print("Decision boundary plot saved to 'perceptron_decision_boundary.png'")
+        
+        plt.close(fig)  # Close the figure to prevent memory leaks
     
     def get_model_info(self) -> Dict[str, Any]:
         """
@@ -423,7 +447,8 @@ def generate_non_linearly_separable_data(n_samples: int = 200, noise: float = 0.
 
 def compare_learning_rates(X: np.ndarray, y: np.ndarray, 
                           learning_rates: List[float] = [0.001, 0.01, 0.1, 1.0],
-                          max_epochs: int = 500) -> None:
+                          max_epochs: int = 500,
+                          save_path: Optional[str] = None) -> None:
     """
     Compare perceptron performance with different learning rates
     
@@ -437,6 +462,8 @@ def compare_learning_rates(X: np.ndarray, y: np.ndarray,
         Learning rates to compare
     max_epochs : int
         Maximum training epochs
+    save_path : str, optional
+        Path to save the figure instead of using default name
     """
     fig, axes = plt.subplots(2, 2, figsize=(15, 10))
     axes = axes.ravel()
@@ -474,7 +501,12 @@ def compare_learning_rates(X: np.ndarray, y: np.ndarray,
     
     plt.suptitle('Learning Rate Comparison', fontsize=16)
     plt.tight_layout()
-    plt.show()
+    
+    # Save figure instead of showing it
+    output_path = save_path if save_path else 'perceptron_learning_rate_comparison.png'
+    plt.savefig(output_path)
+    print(f"Learning rate comparison plot saved to '{output_path}'")
+    plt.close(fig)  # Close the figure to prevent memory leaks
     
     # Print summary
     print("\n" + "="*80)
@@ -591,13 +623,19 @@ def demonstrate_perceptron_variants() -> None:
     # 4. Learning Rate Comparison
     print("\n4. LEARNING RATE COMPARISON")
     print("-" * 35)
-    compare_learning_rates(X_sep, y_sep)
+    compare_learning_rates(X_sep, y_sep, save_path='perceptron_learning_rate_comparison.png')
     
     # 5. High-dimensional data
     print("\n5. HIGH-DIMENSIONAL DATA")
     print("-" * 30)
     X_high, y_high = generate_linearly_separable_data(n_samples=300, n_features=10, random_state=42)
     analyze_dataset_separability(X_high, y_high, "High-dimensional (10D)")
+    
+    # Save all figures instead of displaying them
+    print("\nAll figures have been saved to disk instead of displaying interactively.")
+    print("This is due to using the non-interactive 'Agg' matplotlib backend.")
+    print("Check the current directory for the generated PNG files.")
+    plt.close('all')  # Close all figures to prevent memory leaks
 
 def demonstrate_convergence_analysis() -> None:
     """
@@ -661,23 +699,31 @@ def demonstrate_convergence_analysis() -> None:
     
     plt.suptitle('Convergence Analysis: Effect of Class Separation', fontsize=16)
     plt.tight_layout()
-    plt.show()
+    
+    # Save figure instead of displaying it
+    plt.savefig('perceptron_convergence_analysis.png')
+    print("\nConvergence analysis plot saved to 'perceptron_convergence_analysis.png'")
+    plt.close(fig)  # Close the figure to prevent memory leaks
 
 if __name__ == "__main__":
     # Set style for better plots
     plt.style.use('default')
     sns.set_palette("husl")
     
-    # Run demonstrations
-    demonstrate_perceptron_variants()
-    demonstrate_convergence_analysis()
-    
-    print("\n" + "="*80)
-    print("PERCEPTRON DEMONSTRATION COMPLETE")
-    print("="*80)
-    print("\nKey Takeaways:")
-    print("1. Perceptron can only learn linearly separable patterns")
-    print("2. Learning rate affects convergence speed")
-    print("3. Class separation difficulty affects convergence")
-    print("4. Perceptron provides interpretable linear decision boundaries")
-    print("5. Feature scaling can improve convergence")
+    try:
+        # Run demonstrations
+        demonstrate_perceptron_variants()
+        demonstrate_convergence_analysis()
+        
+        print("\n" + "="*80)
+        print("PERCEPTRON DEMONSTRATION COMPLETE")
+        print("="*80)
+        print("\nKey Takeaways:")
+        print("1. Perceptron can only learn linearly separable patterns")
+        print("2. Learning rate affects convergence speed")
+        print("3. Class separation difficulty affects convergence")
+        print("4. Perceptron provides interpretable linear decision boundaries")
+        print("5. Feature scaling can improve convergence")
+    finally:
+        # Close all figures to prevent Tkinter errors on exit
+        plt.close('all')
