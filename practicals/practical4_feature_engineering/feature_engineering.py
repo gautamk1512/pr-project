@@ -400,7 +400,7 @@ class FeatureEngineering:
         results['feature_info'] = {
             'n_features': X.shape[1],
             'n_samples': X.shape[0],
-            'feature_names': feature_names if feature_names else [f'feature_{i}' for i in range(X.shape[1])]
+            'feature_names': list(feature_names) if feature_names is not None else [f'feature_{i}' for i in range(X.shape[1])]
         }
         
         return results

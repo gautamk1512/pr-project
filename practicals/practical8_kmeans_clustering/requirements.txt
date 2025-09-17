@@ -1,0 +1,15 @@
+# K-Means Clustering Implementation Requirements
+# Install with: pip install -r requirements.txt
+
+numpy>=1.21.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+scikit-learn>=1.0.0
+scipy>=1.7.0
+
+# Optional for enhanced visualizations
+pandas>=1.3.0
+
+# Development dependencies (optional)
+jupyter>=1.0.0
+ipython>=7.0.0
